@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -19,16 +18,11 @@
     <style>
       body {
         font-family: 'Roboto', sans-serif;
-        overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile app feel */
+        overscroll-behavior-y: none;
       }
-      /* Print specific styles for the preview */
       @media print {
-        .no-print {
-          display: none !important;
-        }
-        .print-only {
-          display: block !important;
-        }
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
       }
     </style>
   <script type="importmap">
@@ -48,14 +42,13 @@
 </head>
   <body class="bg-gray-50 text-gray-900 select-none md:select-auto">
     <div id="root"></div>
-    <!-- Entry point for Vite build system -->
     <script type="module" src="/index.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('App ready for installation'))
-            .catch(err => console.log('SW registration failed', err));
+            .then(reg => console.log('App ready'))
+            .catch(err => console.log('SW failed', err));
         });
       }
     </script>
