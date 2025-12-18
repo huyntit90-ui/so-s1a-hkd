@@ -13,7 +13,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sổ doanh thu AI" />
-    <meta name="apple-mobile-web-app-start-url" content="index.html" />
+    <!-- start-url cho iOS phải khớp chính xác với scope -->
+    <meta name="apple-mobile-web-app-start-url" content="./" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
     
     <!-- Windows support -->
@@ -56,17 +57,18 @@
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
     <script>
-      // Đăng ký Service Worker
+      // Đăng ký Service Worker với cơ chế cập nhật ngay lập tức
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
             .then(reg => {
-              console.log('PWA Ready');
+              console.log('PWA v6 Ready');
               reg.onupdatefound = () => {
                 const installingWorker = reg.installing;
                 if (installingWorker) {
                   installingWorker.onstatechange = () => {
                     if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // Ép làm mới trang khi có SW mới
                       window.location.reload();
                     }
                   };
@@ -77,10 +79,20 @@
         });
       }
 
-      // Xử lý trường hợp URL bị sai lệch khi mở từ Home Screen
-      if (window.navigator.standalone && !window.location.pathname.endsWith('index.html') && window.location.pathname !== '/') {
-        console.log('Redirecting to clean path...');
-        window.location.href = 'index.html';
+      // CHỐNG LỖI 404 TRÊN iOS HOME SCREEN
+      // Nếu app đang mở từ màn hình chính (standalone)
+      const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+      if (isPWA) {
+        // Nếu đường dẫn hiện tại không phải là đường dẫn gốc (có đuôi lạ)
+        const currentPath = window.location.pathname;
+        const search = window.location.search;
+        
+        // Nếu thấy có đuôi lạ (như index.html hoặc tham số lạ gây lỗi)
+        if (currentPath.endsWith('index.html') || search.length > 20) {
+           console.log('Phát hiện URL không sạch, đang tự sửa...');
+           // Đẩy về trang chủ sạch sẽ
+           window.location.replace(window.location.origin + window.location.pathname.replace('index.html', ''));
+        }
       }
     </script>
   </body>
