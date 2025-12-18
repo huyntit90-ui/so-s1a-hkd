@@ -1,4 +1,3 @@
-
 {
   "short_name": "Sổ doanh thu AI",
   "name": "Sổ doanh thu AI - Thông minh & Tiện lợi",
@@ -17,8 +16,8 @@
       "purpose": "any"
     }
   ],
-  "start_url": ".",
-  "scope": "/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "theme_color": "#1e40af",
   "background_color": "#ffffff",
