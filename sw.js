@@ -1,6 +1,5 @@
-const CACHE_NAME = 's1a-ai-v6';
+const CACHE_NAME = 's1a-ai-v7';
 const ASSETS = [
-  './',
   './index.html',
   './manifest.json',
   './index.tsx',
@@ -10,8 +9,8 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Lưu trữ tất cả các biến thể có thể có của trang chủ
-      return cache.addAll(ASSETS);
+      // Lưu tệp index.html với nhiều khóa khác nhau để đảm bảo luôn tìm thấy
+      return cache.addAll([...ASSETS, './', 'index.html']);
     }).then(() => self.skipWaiting())
   );
 });
@@ -27,29 +26,22 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Chỉ xử lý các yêu cầu điều hướng (khi người dùng mở hoặc tải lại trang)
+  // CHIẾN LƯỢC QUAN TRỌNG: Đánh chặn mọi yêu cầu trang web (navigate)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Nếu mạng trả về 404 (Lỗi không tìm thấy), phục hồi bằng index.html từ cache
-          if (response.status === 404) {
-            return caches.match('./index.html') || caches.match('./');
-          }
-          return response;
-        })
-        .catch(() => {
-          // Nếu hoàn toàn mất mạng, lấy từ cache
-          return caches.match('./index.html') || caches.match('./');
-        })
+      caches.match('./index.html').then((cachedResponse) => {
+        // Luôn ưu tiên trả về index.html từ cache trước để tránh 404 từ server
+        const networkFetch = fetch(event.request).catch(() => null);
+        return cachedResponse || networkFetch;
+      })
     );
     return;
   }
 
-  // Với các tài nguyên khác (ảnh, script, css)
+  // Với các tài nguyên khác (ảnh, script)
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
+    caches.match(event.request, { ignoreSearch: true }).then((response) => {
+      return response || fetch(event.request);
     })
   );
 });

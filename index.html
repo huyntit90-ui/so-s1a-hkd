@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="vi">
   <head>
+    <script>
+      // CHỐNG LỖI 404 VÀ ĐUÔI LẠ TRÊN iOS (CHẠY TRƯỚC KHI TẢI TRANG)
+      (function() {
+        const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+        const hasBadQuery = window.location.search.length > 0 || window.location.pathname.includes('index.html');
+        
+        if (isPWA && hasBadQuery) {
+          // Nếu app đang mở từ màn hình chính mà có tham số lạ (?...) hoặc có đuôi index.html
+          // Ép trình duyệt về địa chỉ gốc sạch sẽ
+          const cleanURL = window.location.origin + window.location.pathname.replace('index.html', '');
+          window.history.replaceState({}, document.title, cleanURL);
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Sổ doanh thu AI</title>
@@ -13,14 +27,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sổ doanh thu AI" />
-    <!-- start-url cho iOS phải khớp chính xác với scope -->
-    <meta name="apple-mobile-web-app-start-url" content="./" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
     
-    <!-- Windows support -->
-    <meta name="msapplication-TileImage" content="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
-    <meta name="msapplication-TileColor" content="#1e40af" />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -32,10 +40,6 @@
       @media print {
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-      }
-      .pwa-overlay {
-        background: rgba(0,0,0,0.7);
-        backdrop-filter: blur(4px);
       }
     </style>
   <script type="importmap">
@@ -57,42 +61,24 @@
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
     <script>
-      // Đăng ký Service Worker với cơ chế cập nhật ngay lập tức
+      // Đăng ký Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
             .then(reg => {
-              console.log('PWA v6 Ready');
+              console.log('PWA v7 Active');
               reg.onupdatefound = () => {
-                const installingWorker = reg.installing;
-                if (installingWorker) {
-                  installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      // Ép làm mới trang khi có SW mới
+                const sw = reg.installing;
+                if (sw) {
+                  sw.onstatechange = () => {
+                    if (sw.state === 'installed' && navigator.serviceWorker.controller) {
                       window.location.reload();
                     }
                   };
                 }
               };
-            })
-            .catch(err => console.log('SW failed', err));
+            });
         });
-      }
-
-      // CHỐNG LỖI 404 TRÊN iOS HOME SCREEN
-      // Nếu app đang mở từ màn hình chính (standalone)
-      const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-      if (isPWA) {
-        // Nếu đường dẫn hiện tại không phải là đường dẫn gốc (có đuôi lạ)
-        const currentPath = window.location.pathname;
-        const search = window.location.search;
-        
-        // Nếu thấy có đuôi lạ (như index.html hoặc tham số lạ gây lỗi)
-        if (currentPath.endsWith('index.html') || search.length > 20) {
-           console.log('Phát hiện URL không sạch, đang tự sửa...');
-           // Đẩy về trang chủ sạch sẽ
-           window.location.replace(window.location.origin + window.location.pathname.replace('index.html', ''));
-        }
       }
     </script>
   </body>
