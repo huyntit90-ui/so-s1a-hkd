@@ -1,28 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
   <head>
-    <script>
-      // CHỐNG LỖI 404 VÀ ĐUÔI LẠ (PHIÊN BẢN V8)
-      (function() {
-        // 1. Dọn dẹp URL ngay khi mở trang trong Safari (trước khi người dùng kịp nhấn cài đặt)
-        if (window.location.search.length > 0 || window.location.hash.length > 0) {
-          // Nếu có ?... hoặc #..., xóa sạch và đưa về trang gốc
-          const cleanURL = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanURL);
-          console.log("URL đã được làm sạch để chuẩn bị cài đặt.");
-        }
-
-        // 2. Xử lý khi đã ở trong chế độ màn hình chính (Standalone)
-        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-        if (isStandalone) {
-          // Nếu chẳng may vẫn bị dính đuôi index.html do Safari tự hiểu sai
-          if (window.location.pathname.endsWith('index.html')) {
-            const rootPath = window.location.pathname.replace('index.html', '');
-            window.location.replace(window.location.origin + rootPath);
-          }
-        }
-      })();
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Sổ doanh thu AI</title>
@@ -69,17 +47,18 @@
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
     <script>
-      // Đăng ký Service Worker v8
+      // Đăng ký Service Worker v9
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
             .then(reg => {
-              console.log('PWA v8 Bảo vệ đa lớp');
+              console.log('PWA v9 Đã sẵn sàng');
               reg.onupdatefound = () => {
                 const sw = reg.installing;
                 if (sw) {
                   sw.onstatechange = () => {
                     if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                      // Tự động tải lại khi có bản cập nhật mới
                       window.location.reload();
                     }
                   };
