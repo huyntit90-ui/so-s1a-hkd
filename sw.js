@@ -1,16 +1,22 @@
-const CACHE_NAME = 's1a-ai-v9';
-const ASSETS = [
-  'index.html',
-  'manifest.json',
-  'index.tsx',
-  'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+const CACHE_NAME = 's1a-ai-v11';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
+      // Thử cache các file quan trọng, nếu lỗi 1 file cũng không làm SW chết hẳn
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map(url => cache.add(url))
+      ).then(results => {
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) console.warn('SW: Một số tài nguyên không thể cache:', failed);
+      });
+    })
   );
 });
 
@@ -25,20 +31,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Navigation fallback: Nếu là yêu cầu tải trang, luôn trả về index.html từ cache
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('index.html');
-      })
-    );
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
-  // Cache first, fallback to network cho các tài nguyên khác
+  // Chiến lược: Network First (Ưu tiên mạng để cập nhật dữ liệu mới nhất từ AI)
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((response) => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .catch(() => {
+        return caches.match(event.request).then(response => {
+          if (response) return response;
+          // Nếu là điều hướng trang, trả về index.html từ cache
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
+      })
   );
 });
