@@ -134,7 +134,7 @@ export default function App() {
       try {
         await navigator.share({
           files: [file],
-          title: 'Sổ S1a-HKD',
+          title: 'Sổ doanh thu AI',
           text: `Gửi sổ doanh thu của ${data.info.name}`,
         });
       } catch (error) {
@@ -341,7 +341,7 @@ export default function App() {
         {/* Branding Strip */}
         <div className="bg-red-700 text-white py-1.5 px-4 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap">
           <ShieldCheck className="w-3.5 h-3.5 text-yellow-400" />
-          Sổ doanh thu thông minh (AI)
+          Sổ doanh thu AI - Thông minh & Tiện ích
         </div>
         
         <div className="bg-indigo-900 p-8 md:p-12 relative overflow-hidden">
@@ -356,14 +356,14 @@ export default function App() {
               </div>
               
               <h1 className="text-3xl md:text-6xl font-black text-white drop-shadow-lg tracking-tighter uppercase mt-2">
-                 Sổ Doanh Thu S1a
+                 Sổ doanh thu AI
               </h1>
               
               <div className="mt-4 flex flex-col md:flex-row items-center gap-3 md:gap-6 justify-center md:justify-start">
                 <div className="flex items-center gap-2 bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
                   <Sparkles className="w-4 h-4 text-yellow-400" />
                   <p className="text-indigo-100 text-xs md:text-sm font-bold italic">
-                    Ứng dụng hỗ trợ miễn phí cho hộ kinh doanh
+                    Công nghệ AI hỗ trợ HKD miễn phí
                   </p>
                 </div>
                 
