@@ -4,6 +4,7 @@ import { BookOpen, Trash2, Plus, ArrowLeft, Download, FileText, DollarSign, File
 import { S1aFormState, Transaction, AppView, TaxPayerInfo } from './types';
 import VoiceInput from './components/VoiceInput';
 import PreviewS1a from './components/PreviewS1a';
+import InstallPWA from './components/InstallPWA'; // Import mới
 import { parseTransactionFromAudio, transcribeAudio, transcribeStandardizedInfo } from './services/geminiService';
 import { exportToDoc, exportToExcel, generateExcelBlob } from './utils/exportUtils';
 import { saveToDB, loadFromDB, clearDB } from './services/db';
@@ -280,6 +281,8 @@ export default function App() {
           </button>
         </div>
       </div>
+
+      <InstallPWA />
 
       {/* Modal xác nhận làm mới */}
       {showResetConfirm && (
