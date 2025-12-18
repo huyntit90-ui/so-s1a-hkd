@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sổ doanh thu AI" />
-    <meta name="apple-mobile-web-app-start-url" content="./" />
+    <meta name="apple-mobile-web-app-start-url" content="index.html" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
     
     <!-- Windows support -->
@@ -32,7 +32,6 @@
         .no-print { display: none !important; }
         .print-only { display: block !important; }
       }
-      /* Hiệu ứng mờ nền khi hiện popup cài đặt */
       .pwa-overlay {
         background: rgba(0,0,0,0.7);
         backdrop-filter: blur(4px);
@@ -57,12 +56,12 @@
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
     <script>
+      // Đăng ký Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
             .then(reg => {
               console.log('PWA Ready');
-              // Kiểm tra xem có bản cập nhật không và ép làm mới
               reg.onupdatefound = () => {
                 const installingWorker = reg.installing;
                 if (installingWorker) {
@@ -76,6 +75,12 @@
             })
             .catch(err => console.log('SW failed', err));
         });
+      }
+
+      // Xử lý trường hợp URL bị sai lệch khi mở từ Home Screen
+      if (window.navigator.standalone && !window.location.pathname.endsWith('index.html') && window.location.pathname !== '/') {
+        console.log('Redirecting to clean path...');
+        window.location.href = 'index.html';
       }
     </script>
   </body>

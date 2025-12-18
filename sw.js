@@ -1,6 +1,5 @@
-const CACHE_NAME = 's1a-ai-v4';
+const CACHE_NAME = 's1a-ai-v5';
 const ASSETS = [
-  './',
   './index.html',
   './manifest.json',
   './index.tsx',
@@ -10,8 +9,8 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching shell assets');
-      return cache.addAll(ASSETS);
+      // Thêm cả các biến thể của trang chủ vào cache
+      return cache.addAll([...ASSETS, './', 'index.html']);
     }).then(() => self.skipWaiting())
   );
 });
@@ -27,20 +26,39 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Với yêu cầu điều hướng (khi mở App), ưu tiên mạng nhưng fallback về cache ngay lập tức nếu lỗi
+  // Chiến lược cho yêu cầu điều hướng (Navigate requests - khi người dùng mở trang/app)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('./index.html') || caches.match('./');
-      })
+      fetch(event.request)
+        .catch(() => {
+          // Nếu mạng lỗi hoặc không tìm thấy trang (404), trả về index.html từ cache
+          return caches.match('index.html') || caches.match('./');
+        })
     );
     return;
   }
 
-  // Với các tài nguyên khác, sử dụng Cache-First
+  // Chiến lược cho các tài nguyên khác (ảnh, script, css)
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      
+      return fetch(event.request).then((networkResponse) => {
+        // Nếu là yêu cầu hợp lệ, trả về kết quả mạng
+        if (networkResponse && networkResponse.status === 200) {
+          return networkResponse;
+        }
+        // Nếu mạng trả về lỗi (như 404), và là yêu cầu tài liệu, trả về index.html
+        if (event.request.destination === 'document') {
+          return caches.match('index.html');
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Dự phòng cuối cùng cho tài liệu khi offline hoàn toàn
+        if (event.request.destination === 'document') {
+          return caches.match('index.html');
+        }
+      });
     })
   );
 });
