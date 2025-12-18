@@ -6,13 +6,14 @@
     <title>Sổ doanh thu AI</title>
     
     <!-- PWA Settings -->
-    <link rel="manifest" href="./manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#1e40af" />
     
     <!-- iOS support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sổ doanh thu AI" />
+    <meta name="apple-mobile-web-app-start-url" content="./" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" />
     
     <!-- Windows support -->
@@ -54,13 +55,25 @@
 </head>
   <body class="bg-gray-50 text-gray-900 select-none md:select-auto">
     <div id="root"></div>
-    <!-- Sửa đường dẫn src thành tương đối -->
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('PWA Ready'))
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => {
+              console.log('PWA Ready');
+              // Kiểm tra xem có bản cập nhật không và ép làm mới
+              reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                if (installingWorker) {
+                  installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      window.location.reload();
+                    }
+                  };
+                }
+              };
+            })
             .catch(err => console.log('SW failed', err));
         });
       }
